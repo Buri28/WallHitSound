@@ -1,0 +1,11 @@
+{
+    "msbuildProperties": {
+        "BeatSaberPath": "D:\\BSManager\\BSInstances\\1.40.8",
+        "BeatSaberManagedPath": "D:\\BSManager\\BSInstances\\1.40.8\\Beat Saber_Data\\Managed",
+        "BeatSaberPluginsPath": "D:\\BSManager\\BSInstances\\1.40.8\\Plugins"
+    },
+    "FormattingOptions": {
+        "useTabs": false,
+        "indentSize": 4
+    }
+}

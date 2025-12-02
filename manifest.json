@@ -1,0 +1,8 @@
+{
+  "id": "WallHitSound",
+  "name": "WallHitSound",
+  "version": "0.0.1",
+  "author": "generated",
+  "description": "Plays a sound when the player's head hits a wall.",
+  "gameVersion": "1.0.0"
+}

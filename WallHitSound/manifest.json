@@ -1,0 +1,13 @@
+{
+  "id": "WallHitSound",
+  "name": "WallHitSound",
+  "version": "1.0.0",
+  "author": "Buri",
+  "description": "Plays a sound when the player's head hits a wall.",
+  "gameVersion": "1.40.8",
+  "dependsOn": {
+    "BSIPA": "^4.2.0",
+    "BeatSaberMarkupLanguage": "*",
+    "SiraUtil": "*"
+  }
+}

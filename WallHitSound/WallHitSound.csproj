@@ -1,0 +1,125 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net4.8</TargetFramework>
+    <AssemblyName>WallHitSound</AssemblyName>
+    <RootNamespace>WallHitSound</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Beat Saber Installation Path (adjust to your environment) -->
+    <BeatSaberPath>D:\BSManager\BSInstances\1.40.8</BeatSaberPath>
+    <BeatSaberManagedPath>$(BeatSaberPath)\Beat Saber_Data\Managed</BeatSaberManagedPath>
+    <BeatSaberPluginsPath>$(BeatSaberPath)\Plugins</BeatSaberPluginsPath>
+    <!-- Temporary output to avoid locked DLL during iterative work -->
+    <OutputPath>bin\$(Configuration)\$(TargetFramework)\</OutputPath>
+    <!-- Disable SDK implicit embedded resource items so we can explicitly add multiple logical names -->
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+  </PropertyGroup>
+
+  <!-- References are resolved at runtime by Beat Saber mod loader -->
+   <ItemGroup>
+    <!-- BSIPA Core -->
+    <Reference Include="IPA">
+        <HintPath>$(BeatSaberManagedPath)\IPA.Loader.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+
+    <!-- Zenject (Dependency Injection) -->
+    <Reference Include="Zenject">
+      <HintPath>$(BeatSaberManagedPath)\Zenject.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Zenject-usage">
+      <HintPath>$(BeatSaberManagedPath)\Zenject-usage.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+
+    <!-- SiraUtil (Zenject integration for Beat Saber) -->
+    <Reference Include="SiraUtil">
+      <HintPath>$(BeatSaberPluginsPath)\SiraUtil.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+
+    <!-- Unity Engine -->
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(BeatSaberManagedPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(BeatSaberManagedPath)\UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(BeatSaberManagedPath)\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(BeatSaberManagedPath)\UnityEngine.AudioModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>$(BeatSaberManagedPath)\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule">
+      <HintPath>$(BeatSaberManagedPath)\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- Beat Saber Gameplay APIs -->
+    <Reference Include="Main">
+      <HintPath>$(BeatSaberManagedPath)\Main.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="GameplayCore">
+      <HintPath>$(BeatSaberManagedPath)\GameplayCore.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BeatmapCore">
+      <HintPath>$(BeatSaberManagedPath)\BeatmapCore.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- BSML (Beat Saber Markup Language) -->
+    <Reference Include="BSML">
+        <HintPath>$(BeatSaberPluginsPath)\BSML.dll</HintPath>
+        <Private>False</Private>
+        <SpecificVersion>False</SpecificVersion>
+    </Reference>
+
+    <!-- BS_Utils -->
+    <Reference Include="BS_Utils">
+        <HintPath>$(BeatSaberPluginsPath)\BS_Utils.dll</HintPath>
+        <Private>False</Private>
+        <SpecificVersion>False</SpecificVersion>
+    </Reference>
+
+    <!-- TextMeshPro (UI Text) -->
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(BeatSaberManagedPath)\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="manifest.json">
+      <LogicalName>$(AssemblyName).manifest.json</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Settings.bsml">
+      <LogicalName>$(AssemblyName).UI.Settings.bsml</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Audio\*" Exclude="Resources\Audio\README_ADD_AUDIO.txt">
+      <LogicalName>$(AssemblyName).Audio.%(FileName)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <Target Name="CopyToPlugins" AfterTargets="Build" Condition="false">
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(BeatSaberPath)\Plugins\" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(BeatSaberPath)\Plugins\" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+    <Message Text="Copied $(AssemblyName).dll to Beat Saber Plugins folder" Importance="high" />
+  </Target>
+
+</Project>
