@@ -15,6 +15,9 @@ obj/
 # Other
 *.tmp
 
+# IDE-specific local settings (not needed in Git)
+omnisharp.json
+
 # ignore build/version helper scripts
 build_versions.ps1
 build_versions.bat
