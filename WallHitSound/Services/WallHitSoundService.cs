@@ -72,7 +72,7 @@ namespace WallHitSound.Services
             }
             catch (Exception ex)
             {
-                Plugin.Log?.Warn($"WallHitSound: Failed to set initial volume: {ex.Message}");
+                LogWarn($"WallHitSound: Failed to set initial volume: {ex.Message}");
             }
 
             try
@@ -83,10 +83,9 @@ namespace WallHitSound.Services
             }
             catch (Exception ex)
             {
-                Plugin.Log?.Warn($"WallHitSound: Failed to set initial pitch: {ex.Message}");
+                LogWarn($"WallHitSound: Failed to set initial pitch: {ex.Message}");
             }
 
-            Plugin.Log?.Info("WallHitSound: WallHitSoundService initialized successfully");
             LogInfo("WallHitSound: WallHitSoundService initialized successfully");
         }
 
@@ -108,19 +107,16 @@ namespace WallHitSound.Services
                     {
                         _cachedClip = CreateFallbackBeep();
                     }
-                    Plugin.Log?.Info($"WallHitSound: Using beep sound");
                     LogInfo($"WallHitSound: Using beep sound");
                 }
                 else
                 {
                     // UserDataからカスタムオーディオファイルを読み込む
                     string userDataPath = Utilities.BeatSaberPathHelper.GetBeatSaberUserDataPath();
-                    Plugin.Log?.Info($"WallHitSound: userDataPath = '{userDataPath}'");
                     LogInfo($"WallHitSound: userDataPath = '{userDataPath}'");
 
                     if (userDataPath == null)
                     {
-                        Plugin.Log?.Warn($"WallHitSound: Could not determine UserData path, using fallback beep");
                         LogWarn($"WallHitSound: Could not determine UserData path, using fallback beep");
                         _cachedClip = CreateFallbackBeep();
                         return;
@@ -133,17 +129,14 @@ namespace WallHitSound.Services
                     foreach (var ext in extensions)
                     {
                         string filePath = Path.Combine(userDataPath, selectedSound + ext);
-                        Plugin.Log?.Debug($"WallHitSound: Checking for file: {filePath}");
                         LogDebug($"WallHitSound: Checking for file: {filePath}");
                         if (File.Exists(filePath))
                         {
-                            Plugin.Log?.Info($"WallHitSound: Found file: {filePath}");
                             LogInfo($"WallHitSound: Found file: {filePath}");
                             loadedClip = LoadAudioClip(filePath);
                             if (loadedClip != null)
                             {
                                 _cachedClip = loadedClip;
-                                Plugin.Log?.Info($"WallHitSound: Successfully loaded custom audio: {selectedSound}{ext}");
                                 LogInfo($"WallHitSound: Successfully loaded custom audio: {selectedSound}{ext}");
                                 return;
                             }
@@ -151,14 +144,12 @@ namespace WallHitSound.Services
                     }
 
                     // カスタムファイルが見つからない場合はビープ音にフォールバック
-                    Plugin.Log?.Warn($"WallHitSound: Custom audio file '{selectedSound}' not found in {userDataPath}, using fallback beep");
                     LogWarn($"WallHitSound: Custom audio file '{selectedSound}' not found in {userDataPath}, using fallback beep");
                     _cachedClip = CreateFallbackBeep();
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Log?.Error($"WallHitSound: Error loading sound: {ex.Message}\n{ex.StackTrace}");
                 LogError($"WallHitSound: Error loading sound: {ex.Message}\n{ex.StackTrace}");
 
                 // エラー時はビープ音にフォールバック
@@ -174,7 +165,6 @@ namespace WallHitSound.Services
             try
             {
                 string extension = Path.GetExtension(filePath).ToLower();
-                Plugin.Log?.Info($"WallHitSound: LoadAudioClip called for: {filePath} (extension: {extension})");
                 LogInfo($"WallHitSound: LoadAudioClip called for: {filePath} (extension: {extension})");
 
                 // サポートされている形式をチェック
@@ -184,13 +174,11 @@ namespace WallHitSound.Services
                 }
                 else
                 {
-                    Plugin.Log?.Warn($"WallHitSound: Format {extension} is not supported. Supported formats: WAV, OGG, MP3");
                     LogWarn($"WallHitSound: Format {extension} is not supported. Supported formats: WAV, OGG, MP3");
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Log?.Error($"WallHitSound: Failed to load audio clip {filePath}: {ex.Message}\n{ex.StackTrace}");
                 LogError($"WallHitSound: Failed to load audio clip {filePath}: {ex.Message}\n{ex.StackTrace}");
             }
             return null;
@@ -203,7 +191,6 @@ namespace WallHitSound.Services
         {
             try
             {
-                Plugin.Log?.Info($"WallHitSound: Loading audio via UnityWebRequest from: {filePath}");
                 LogInfo($"WallHitSound: Loading audio via UnityWebRequest from: {filePath}");
 
                 // ファイルパスをURI形式に変換
@@ -227,21 +214,18 @@ namespace WallHitSound.Services
                         AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
                         if (clip != null)
                         {
-                            Plugin.Log?.Info($"WallHitSound: Successfully loaded audio clip: {Path.GetFileName(filePath)}");
                             LogInfo($"WallHitSound: Successfully loaded audio clip: {Path.GetFileName(filePath)}");
                             return clip;
                         }
                     }
                     else
                     {
-                        Plugin.Log?.Error($"WallHitSound: Failed to load audio via web request: {request.error}");
                         LogError($"WallHitSound: Failed to load audio via web request: {request.error}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Log?.Error($"WallHitSound: Error loading audio via web: {ex.Message}\n{ex.StackTrace}");
                 LogError($"WallHitSound: Error loading audio via web: {ex.Message}\n{ex.StackTrace}");
             }
             return null;
@@ -286,7 +270,6 @@ namespace WallHitSound.Services
         {
             if (_audioSource == null)
             {
-                Plugin.Log?.Warn("WallHitSound: AudioSource is null");
                 LogWarn("WallHitSound: AudioSource is null");
                 return;
             }
@@ -326,7 +309,6 @@ namespace WallHitSound.Services
             }
             catch (Exception ex)
             {
-                Plugin.Log?.Error($"WallHitSound: PlaySound failed: {ex.Message}\n{ex.StackTrace}");
                 LogError($"WallHitSound: PlaySound failed: {ex.Message}\n{ex.StackTrace}");
             }
         }
@@ -373,7 +355,6 @@ namespace WallHitSound.Services
         /// </summary>
         public void ReloadSound()
         {
-            Plugin.Log?.Info("WallHitSound: Reloading sound");
             LogInfo("WallHitSound: Reloading sound");
             LoadSound();
         }

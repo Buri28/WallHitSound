@@ -20,7 +20,8 @@ namespace WallHitSound.Utilities
                 // IPA の UnityGame API から UserData パスを取得
                 string userDataPath = Path.Combine(UnityGame.UserDataPath, "WallHitSound");
 
-                Plugin.Log?.Info($"WallHitSound: UserData path: {userDataPath}");
+                // Menu/Gameplay 共にノイズになるため Debug に降格
+                Plugin.Log?.Debug($"WallHitSound: UserData path: {userDataPath}");
 
                 return userDataPath;
             }
