@@ -5,14 +5,13 @@
 私は大体ぶつかっています。  
 
 ## 設定画面
-<img width="40%" height="40%" alt="image" src="https://github.com/user-attachments/assets/929dab24-67ee-43d5-8447-8c83e0cef1bd" />  
-
+<img width="40%" height="40%" alt="image" src="https://github.com/user-attachments/assets/7afa7e6a-bb7b-4fbd-9e5f-b0fb1c529c7d" />
 <small>※画像は開発中のものです。</small> 
 - **Enabled**：Modの有効/無効を切り替えます。
 
 - **Volume**：beep音や設定した音のボリュームを変更します。
 
-- **Sound Type**：壁に衝突したときに鳴らしたい音  
+- **Sound Type**：壁に衝突したときに鳴らしたい音を選択します。
   ・beepを選択するとbeep音が鳴ります。  
   ・また、鳴らしたい音を「[BeatSaber]\UserData\WallHitSound」フォルダに格納することでプルダウンから選択可能になります。    
   ・対応音源は、wav、ogg、mp3になります。  
@@ -20,6 +19,12 @@
 
 - **Beep Frequency(Hz)**：beep音の周波数を変更します。  
 　※Sound Typeでbeepを選択した場合のみ設定が有効になります。  
-  <img width="40%" height="40%" alt="image" src="https://github.com/user-attachments/assets/7f85d4b3-d0da-47c2-910a-e3179d516be5" />
+  <img width="40%" height="40%" alt="image" src="https://github.com/user-attachments/assets/16949e34-562e-4d67-b94a-fd84ceae1573" />
 
-- **pitch**：beep音や設定した音のピッチを変更します。
+- **Pitch**：beep音や設定した音のピッチを変更します。
+
+- **Collision Particels**（おまけ機能）：壁に衝突時に出す火花のパーティクルを数を設定します。
+
+- **TEST SOUNDボタン**：設定したサウンドをテストします。
+
+- **RESET ALL SETTINGSボタン**：すべての設定を初期状態にリセットします。
