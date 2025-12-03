@@ -610,5 +610,14 @@ namespace WallHitSound.UI
             // タブ再構築は行わない（レイアウト崩れ回避）。通知のみで反映。
             if (_verboseLogs) Plugin.Log?.Info("WallHitSound: ===== RESET SETTINGS END =====");
         }
+
+        /// <summary>
+        /// 小数点なしでフォーマットした表示文字列を返す
+        /// </summary>
+        [UIValue("FormatNoDecimal")]
+        public string FormatNoDecimal(float value)
+        {
+            return value.ToString("F0"); // 小数点なしで表示
+        }
     }
 }
