@@ -23,5 +23,8 @@ namespace WallHitSound
 
         /// <summary>オーディオピッチ（0.5～2.0、デフォルト: 1.0）</summary>
         public virtual float AudioPitch { get; set; } = 1.0f;
+
+        /// <summary>壁衝突時のパーティクル数（0で無効、デフォルト: 0）</summary>
+        public virtual int ParticleCount { get; set; } = 0;
     }
 }
