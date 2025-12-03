@@ -44,7 +44,11 @@ namespace WallHitSound.Services
                     Vector3 forward = (Camera.main != null)
                         ? Camera.main.transform.forward
                         : this.transform.forward;
-                    ParticleEffectService.SpawnHemisphere(origin + forward * 0.15f, count, new Color(1.0f, 0.15f, 0.15f));
+                    // 少し奥＋少し上にオフセットして、頭の高さ付近で視認しやすく表示
+                    float forwardOffset = 0.22f; // 0.18〜0.25で調整可
+                    float upOffset = 0.08f;      // 0.05〜0.12で調整可
+                    Vector3 spawnPos = origin + forward * forwardOffset + Vector3.up * upOffset;
+                    ParticleEffectService.SpawnHemisphere(spawnPos, count, new Color(1.0f, 0.15f, 0.15f));
                 }
             }
             previousFrameInObstacle = current;
