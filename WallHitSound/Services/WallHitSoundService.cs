@@ -303,20 +303,16 @@ namespace WallHitSound.Services
                 // AudioSource のプロパティを設定
                 _audioSource.volume = volume;
                 _audioSource.pitch = pitch;
-
-                Plugin.Log?.Debug($"WallHitSound: AudioSource settings - volume={volume}, pitch={pitch}");
                 LogDebug($"WallHitSound: AudioSource settings - volume={volume}, pitch={pitch}");
 
                 if (_cachedClip != null)
                 {
-                    Plugin.Log?.Debug($"WallHitSound: Playing cached clip: {_cachedClip.name}");
                     LogDebug($"WallHitSound: Playing cached clip: {_cachedClip.name}");
                     _audioSource.PlayOneShot(_cachedClip, 1.0f);  // PlayOneShot は volume を無視するので、直接 volume を設定
                     return;
                 }
 
                 // フォールバック：ビープ音を生成して再生
-                Plugin.Log?.Debug("WallHitSound: Playing fallback beep");
                 LogDebug("WallHitSound: Playing fallback beep");
                 AudioClip beep = CreateFallbackBeep();
                 if (beep != null)
@@ -325,7 +321,6 @@ namespace WallHitSound.Services
                 }
                 else
                 {
-                    Plugin.Log?.Error("WallHitSound: Failed to create fallback beep");
                     LogError("WallHitSound: Failed to create fallback beep");
                 }
             }
