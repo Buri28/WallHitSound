@@ -1,8 +1,8 @@
 # WallHitSound
 
 壁に衝突したときに音を鳴らすMODです。  
-壁を避けたつもりでもぶつかっていることはありませんか？
-私は大体ぶつかっています。
+壁を避けたつもりでもぶつかっていることはありませんか？  
+私は大体ぶつかっています。  
 
 ## 設定画面
 <img width="40%" height="40%" alt="image" src="https://github.com/user-attachments/assets/929dab24-67ee-43d5-8447-8c83e0cef1bd" />  
