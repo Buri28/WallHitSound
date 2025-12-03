@@ -25,18 +25,20 @@ namespace WallHitSound.Services
                 if (Vector3.Dot(randomDir, hemiNormal) < 0f) randomDir = -randomDir;
 
                 Vector3 spawnPos = position + randomDir * Random.Range(0.0f, radius);
+                // 起点から少し離して放出（接触点から浮かせる）
+                float startOffset = 0.03f; // 0.01〜0.03 で調整可
 
                 var spark = new GameObject("WallHitSpark");
                 spark.transform.position = spawnPos;
 
                 var trail = spark.AddComponent<TrailRenderer>();
                 // 表示時間（短いほど控えめ）: 0.03f〜0.08f 推奨
-                trail.time = 0.045f;
+                trail.time = 0.06f; // 少し長めにして視認性を向上
                 // 線幅（細いほど控えめ）: 0.0003f〜0.003f 推奨
-                trail.startWidth = 0.0005f;
+                trail.startWidth = 0.0012f; // 奥に表示する分、線幅を太くして視認性を確保
                 trail.endWidth = 0.0f;
                 // 頂点間距離（小さいほど滑らか）: 0.0012f〜0.004f
-                trail.minVertexDistance = 0.0015f;
+                trail.minVertexDistance = 0.0018f;
                 trail.numCornerVertices = 2;
                 trail.numCapVertices = 2;
 
@@ -62,16 +64,15 @@ namespace WallHitSound.Services
                 }
 
                 var mover = spark.AddComponent<TransientMover>();
-                // 散らばり具合の調整
-                // ・hemiNormal への係数を上げると面法線方向に寄る（0.3〜0.8推奨）
-                // ・randomDir の寄与を下げると収束して控えめに見える
-                Vector3 outward = (randomDir + hemiNormal * 0.5f).normalized;
-                // 初速レンジ（低いほど控えめ）: 0.4f〜1.5f
-                mover.Velocity = outward * Random.Range(0.5f, 0.9f);
-                // 減衰（大きいほどすぐ減速）: 6.0f〜12.0f
-                mover.Drag = 10.0f;
-                // 寿命は trail.time に +α（0.01f〜0.03f）
-                mover.Lifetime = trail.time + 0.02f;
+                // 円状（半球）に放出：randomDir を主体にし、法線寄与は控えめ（形状を円状に維持）
+                Vector3 outward = (randomDir * 0.8f + hemiNormal * 0.2f).normalized;
+                // 発生位置を起点から少し離した位置へ移動
+                spawnPos += outward * startOffset;
+
+                // 飛び方は直線的（重力を考慮しない実装）
+                mover.Velocity = outward * Random.Range(0.8f, 1.2f);
+                mover.Drag = 6.0f;
+                mover.Lifetime = trail.time + 0.015f;
             }
         }
     }
