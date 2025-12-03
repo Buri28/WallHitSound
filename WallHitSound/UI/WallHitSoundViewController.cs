@@ -22,6 +22,7 @@ namespace WallHitSound.UI
     public class WallHitSoundViewController : MonoBehaviour, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
+        private static bool SuppressMenuLogs = true;
         private readonly bool _verboseLogs = false;
         private void NotifyPropertyChanged(string propName)
         {
@@ -80,7 +81,7 @@ namespace WallHitSound.UI
 
         private void Awake()
         {
-            Plugin.Log?.Info("WallHitSoundViewController Awake");
+            if (!SuppressMenuLogs) Plugin.Log?.Info("WallHitSoundViewController Awake");
 
             // ローカル変数をPluginConfigから初期化
             _enabled = PluginConfig.Instance.Enabled;
@@ -89,7 +90,7 @@ namespace WallHitSound.UI
             _beepFrequency = PluginConfig.Instance.BeepFrequency;
             _audioPitch = PluginConfig.Instance.AudioPitch;
             _particleCount = PluginConfig.Instance.ParticleCount;
-            Plugin.Log?.Info($"WallHitSound: Initialized local fields - Enabled={_enabled}, Volume={_volume}, Sound={_selectedSound}, Freq={_beepFrequency}, Pitch={_audioPitch}");
+            if (!SuppressMenuLogs) Plugin.Log?.Info($"WallHitSound: Initialized local fields - Enabled={_enabled}, Volume={_volume}, Sound={_selectedSound}, Freq={_beepFrequency}, Pitch={_audioPitch}");
 
             // Menu scope 用のローカル AudioSource を作成
             GameObject audioGO = new GameObject("WallHitSound_MenuAudio");
@@ -97,7 +98,7 @@ namespace WallHitSound.UI
             _localAudioSource = audioGO.AddComponent<AudioSource>();
             _localAudioSource.playOnAwake = false;
             _localAudioSource.spatialBlend = 0.0f;  // 2D audio
-            Plugin.Log?.Info("WallHitSound: Created local AudioSource for Menu scope");
+            if (!SuppressMenuLogs) Plugin.Log?.Info("WallHitSound: Created local AudioSource for Menu scope");
 
             // カスタムサウンドファイルを読み込む
             LoadCustomSoundFiles();
@@ -105,7 +106,7 @@ namespace WallHitSound.UI
 
         private void Start()
         {
-            Plugin.Log?.Info("WallHitSoundViewController started");
+            if (!SuppressMenuLogs) Plugin.Log?.Info("WallHitSoundViewController started");
             AddGameplayTabIfNeeded();
         }
 
@@ -113,7 +114,7 @@ namespace WallHitSound.UI
         [UIAction("#post-parse")]
         private void OnPostParse()
         {
-            Plugin.Log?.Info("WallHitSoundViewController OnPostParse - syncing UI components");
+            if (!SuppressMenuLogs) Plugin.Log?.Info("WallHitSoundViewController OnPostParse - syncing UI components");
             // UI コンポーネントの初期同期
             if (_enabledToggle != null) { _enabledToggle.Value = _enabled; _enabledToggle.ReceiveValue(); }
             if (_volumeSlider != null) { _volumeSlider.Value = _volume; _volumeSlider.ReceiveValue(); }
@@ -125,12 +126,12 @@ namespace WallHitSound.UI
 
         private void OnEnable()
         {
-            Plugin.Log?.Info("WallHitSoundViewController OnEnable");
+            if (!SuppressMenuLogs) Plugin.Log?.Info("WallHitSoundViewController OnEnable");
         }
 
         private void OnDestroy()
         {
-            Plugin.Log?.Info("WallHitSoundViewController destroyed");
+            if (!SuppressMenuLogs) Plugin.Log?.Info("WallHitSoundViewController destroyed");
         }
 
         /// <summary>
@@ -202,7 +203,7 @@ namespace WallHitSound.UI
                 GameplaySetup.Instance.RemoveTab("WallHitSound");
                 GameplaySetup.Instance.AddTab("WallHitSound", "WallHitSound.UI.Settings.bsml", this, MenuType.Solo);
                 _tabAdded = true;
-                Plugin.Log?.Info("WallHitSoundViewController: added GameplaySetup tab 'WallHitSound'");
+                if (!SuppressMenuLogs) Plugin.Log?.Info("WallHitSoundViewController: added GameplaySetup tab 'WallHitSound'");
             }
             catch (Exception ex)
             {
