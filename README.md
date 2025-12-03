@@ -14,7 +14,7 @@
 
 - **Sound Type**：壁に衝突したときに鳴らしたい音  
   ・beepを選択するとbeep音が鳴ります。  
-  ・また、鳴らしたい音を「<BeatSaber>\UserData\WallHitSound」フォルダに格納することでプルダウンから選択可能になります。    
+  ・また、鳴らしたい音を「[BeatSaber]\UserData\WallHitSound」フォルダに格納することでプルダウンから選択可能になります。    
   ・対応音源は、wav、ogg、mp3になります。  
   ・初期音源としてdeep_impact.wav、wall_hit.wavが生成されます。(フォルダ作成時)  
 
