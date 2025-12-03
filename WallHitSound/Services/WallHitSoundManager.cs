@@ -21,9 +21,11 @@ namespace WallHitSound.Services
             SoundService = service;
         }
 
+        private static bool SuppressGameplayLogs = true;
+
         private void Awake()
         {
-            Plugin.Log?.Info("WallHitSound: WallHitSoundManager Awake");
+            if (!SuppressGameplayLogs) Plugin.Log?.Info("WallHitSound: WallHitSoundManager Awake");
             // シングルトンパターンの実装
             if (Instance == null)
             {
@@ -35,14 +37,15 @@ namespace WallHitSound.Services
         {
             // 音声サービスを初期化
             // プレイ中の性能負荷軽減のため、Playerスコープではログを抑制
-            SoundService.SetLogSuppressed(true);
+            // プレイ中はサービスのログも抑制
+            SoundService.SetLogSuppressed(SuppressGameplayLogs);
             SoundService.Initialize();
 
             // プレイヤーの障害物との衝突判定を取得
             obstacleInteraction = UnityEngine.Object.FindObjectOfType<PlayerHeadAndObstacleInteraction>();
             if (obstacleInteraction == null)
             {
-                Plugin.Log?.Error("WallHitSound: PlayerHeadAndObstacleInteraction not found");
+                if (!SuppressGameplayLogs) Plugin.Log?.Error("WallHitSound: PlayerHeadAndObstacleInteraction not found");
                 return;
             }
 
@@ -50,7 +53,7 @@ namespace WallHitSound.Services
             obstacleMonitor = gameObject.AddComponent<ObstacleMonitor>();
             obstacleMonitor.Initialize(SoundService, obstacleInteraction);
 
-            Plugin.Log?.Info("WallHitSound: Manager initialized successfully");
+            if (!SuppressGameplayLogs) Plugin.Log?.Info("WallHitSound: Manager initialized successfully");
         }
 
         private void OnDestroy()
