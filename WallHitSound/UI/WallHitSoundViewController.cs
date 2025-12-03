@@ -48,11 +48,15 @@ namespace WallHitSound.UI
         private List<object> _customSoundFiles = new List<object>();
 
         // UI コンポーネント参照（パース後に解決）
+        // ビルド時は未割り当てなので CS0649 を抑制（BSML がランタイムで設定）
+#pragma warning disable 0649
         [UIComponent("enabled-toggle")] private ToggleSetting _enabledToggle;
         [UIComponent("volume-slider")] private SliderSetting _volumeSlider;
         [UIComponent("sound-dropdown")] private DropDownListSetting _soundDropdown;
         [UIComponent("beep-slider")] private SliderSetting _beepSlider;
         [UIComponent("pitch-slider")] private SliderSetting _pitchSlider;
+        [UIComponent("particle-slider")] private SliderSetting _particleSlider;
+#pragma warning restore 0649
 
         // ローカルバインディング用の変数（UI表示用）
         private bool _enabled = true;
@@ -60,13 +64,17 @@ namespace WallHitSound.UI
         private string _selectedSound = "beep";
         private float _beepFrequency = 1000f;
         private float _audioPitch = 1.0f;
+        private float _particleCount = 0f;
 
         // Menu scope 用の AudioSource
         private AudioSource _localAudioSource;
 
         // Menu scope 用の WallHitSoundService（Zenject注入用）
+        // Zenject によりランタイム注入されるため CS0649 を抑制
+#pragma warning disable 0649
         [Inject]
         private WallHitSoundService _menuSoundService;
+#pragma warning restore 0649
 
 
 
@@ -80,6 +88,7 @@ namespace WallHitSound.UI
             _selectedSound = PluginConfig.Instance.SelectedClipName ?? "beep";
             _beepFrequency = PluginConfig.Instance.BeepFrequency;
             _audioPitch = PluginConfig.Instance.AudioPitch;
+            _particleCount = PluginConfig.Instance.ParticleCount;
             Plugin.Log?.Info($"WallHitSound: Initialized local fields - Enabled={_enabled}, Volume={_volume}, Sound={_selectedSound}, Freq={_beepFrequency}, Pitch={_audioPitch}");
 
             // Menu scope 用のローカル AudioSource を作成
@@ -111,6 +120,7 @@ namespace WallHitSound.UI
             if (_soundDropdown != null) { _soundDropdown.Value = _selectedSound; _soundDropdown.ReceiveValue(); }
             if (_beepSlider != null) { _beepSlider.Value = _beepFrequency; _beepSlider.ReceiveValue(); }
             if (_pitchSlider != null) { _pitchSlider.Value = _audioPitch; _pitchSlider.ReceiveValue(); }
+            if (_particleSlider != null) { _particleSlider.Value = _particleCount; _particleSlider.ReceiveValue(); }
         }
 
         private void OnEnable()
@@ -382,6 +392,24 @@ namespace WallHitSound.UI
         }
 
         /// <summary>
+        /// 衝突時のパーティクル数（0で無効）。
+        /// </summary>
+        [UIValue("particle-count")]
+        public float ParticleCount
+        {
+            get => _particleCount;
+            set
+            {
+                if (Math.Abs(_particleCount - value) > 0.0001f)
+                {
+                    _particleCount = Mathf.Clamp(value, 0f, 200f);
+                    PluginConfig.Instance.ParticleCount = Mathf.RoundToInt(_particleCount);
+                    Plugin.Log?.Info($"WallHitSound: ParticleCount changed to {PluginConfig.Instance.ParticleCount}");
+                }
+            }
+        }
+
+        /// <summary>
         /// 現在の設定で音を再生するテストメソッド。
         /// Menu scope でも Player scope でも機能します。
         /// </summary>
@@ -599,6 +627,7 @@ namespace WallHitSound.UI
             SelectedSound = "beep";
             BeepFrequency = 1000f;
             AudioPitch = 1.0f;
+            ParticleCount = 0f;
 
             // UIコンポーネントへ直接反映
             if (_enabledToggle != null) { _enabledToggle.Value = _enabled; _enabledToggle.ReceiveValue(); }
@@ -606,6 +635,7 @@ namespace WallHitSound.UI
             if (_soundDropdown != null) { _soundDropdown.Value = _selectedSound; _soundDropdown.ReceiveValue(); }
             if (_beepSlider != null) { _beepSlider.Value = _beepFrequency; _beepSlider.ReceiveValue(); }
             if (_pitchSlider != null) { _pitchSlider.Value = _audioPitch; _pitchSlider.ReceiveValue(); }
+            if (_particleSlider != null) { _particleSlider.Value = _particleCount; _particleSlider.ReceiveValue(); }
 
             // タブ再構築は行わない（レイアウト崩れ回避）。通知のみで反映。
             if (_verboseLogs) Plugin.Log?.Info("WallHitSound: ===== RESET SETTINGS END =====");
@@ -614,7 +644,7 @@ namespace WallHitSound.UI
         /// <summary>
         /// 小数点なしでフォーマットした表示文字列を返す
         /// </summary>
-        [UIValue("FormatNoDecimal")]
+        [UIAction("FormatNoDecimal")]
         public string FormatNoDecimal(float value)
         {
             return value.ToString("F0"); // 小数点なしで表示
