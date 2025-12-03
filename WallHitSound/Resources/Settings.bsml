@@ -3,10 +3,15 @@
     <text text="WallHitSound Settings" alignment="Center" font-size="6" />
     <vertical child-control-size="false" spacing="1" pad="2">
       <toggle-setting id="enabled-toggle" text="Enabled" value="enabled" apply-on-change="true" />
-      <slider-setting id="volume-slider" text="Volume" value="volume" min="0" max="1" increment="0.01" apply-on-change="true" />
-      <dropdown-list-setting id="sound-dropdown" text="Sound Type" value="selected-sound" choices="sound-options" apply-on-change="true" />
-      <slider-setting id="beep-slider" text="Beep Frequency (Hz)" value="beep-frequency" min="100" max="2000" increment="10" apply-on-change="true" />
-      <slider-setting id="pitch-slider" text="Pitch" value="audio-pitch" min="0.5" max="2.0" increment="0.05" apply-on-change="true" />
+      <slider-setting id="volume-slider" text="Volume" value="volume" 
+        min="0" max="1" increment="0.01" apply-on-change="true" />
+      <dropdown-list-setting id="sound-dropdown" text="Sound Type" 
+        value="selected-sound" choices="sound-options" apply-on-change="true" />
+      <slider-setting id="beep-slider" text="Beep Frequency (Hz)" 
+        value="beep-frequency" min="100" max="2000" increment="10" 
+        formatter="FormatNoDecimal" apply-on-change="true" />
+      <slider-setting id="pitch-slider" text="Pitch" value="audio-pitch" 
+        min="0.5" max="2.0" increment="0.05" apply-on-change="true" />
       <button text="Test Sound" on-click="test-sound" />
       <button text="Reset All Settings" on-click="reset-settings" />
     </vertical>
