@@ -35,7 +35,7 @@ namespace WallHitSound.Services
                 // 表示時間（短いほど控えめ）: 0.03f〜0.08f 推奨
                 trail.time = 0.06f; // 少し長めにして視認性を向上
                 // 線幅（細いほど控えめ）: 0.0003f〜0.003f 推奨
-                trail.startWidth = 0.0012f; // 奥に表示する分、線幅を太くして視認性を確保
+                trail.startWidth = 0.0025f; // 奥に表示する分、線幅を太くして視認性を確保
                 trail.endWidth = 0.0f;
                 // 頂点間距離（小さいほど滑らか）: 0.0012f〜0.004f
                 trail.minVertexDistance = 0.0018f;
