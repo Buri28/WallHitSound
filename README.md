@@ -8,7 +8,7 @@
 Pluginsフォルダに「WallHitSound.dll」を格納してBeatSaberを起動します。
 
 ## 設定画面
-ソロのMODSメニューにWALLHITSOUNDタブが追加されます。
+ソロ ＞ MODSメニューにWALLHITSOUNDタブが追加されます。
 
 <img width="40%" height="40%" alt="image" src="https://github.com/user-attachments/assets/7afa7e6a-bb7b-4fbd-9e5f-b0fb1c529c7d" />  
 
