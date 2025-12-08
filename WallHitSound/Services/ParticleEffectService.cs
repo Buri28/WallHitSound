@@ -16,8 +16,8 @@ namespace WallHitSound.Services
             hemiNormal.Normalize();
 
             // 生成半径（接触点近傍）
-            // 調整目安: 0.003f（極小）〜 0.10f（やや広め）
-            float radius = 0.10f;
+            // 調整目安: 0.003f（極小）〜 0.30f（やや広め）
+            float radius = 0.30f;
             for (int i = 0; i < count; i++)
             {
                 // 半球内ランダム方向
@@ -26,16 +26,16 @@ namespace WallHitSound.Services
 
                 Vector3 spawnPos = position + randomDir * Random.Range(0.0f, radius);
                 // 起点から少し離して放出（接触点から浮かせる）
-                float startOffset = 0.03f; // 0.01〜0.03 で調整可
+                float startOffset = 0.10f; // 0.01〜0.10 で調整可
 
                 var spark = new GameObject("WallHitSpark");
                 spark.transform.position = spawnPos;
 
                 var trail = spark.AddComponent<TrailRenderer>();
-                // 表示時間（短いほど控えめ）: 0.03f〜0.08f 推奨
-                trail.time = 0.08f; // 少し長めにして視認性を向上
-                // 線幅（細いほど控えめ）: 0.0003f〜0.003f 推奨
-                trail.startWidth = 0.003f; // 奥に表示する分、線幅を太くして視認性を確保
+                // 表示時間（短いほど控えめ）: 0.03f〜0.10f 推奨
+                trail.time = 0.10f; // 少し長めにして視認性を向上
+                // 線幅（細いほど控えめ）: 0.0003f〜0.010f 推奨
+                trail.startWidth = 0.005f; // 奥に表示する分、線幅を太くして視認性を確保
                 trail.endWidth = 0.0f;
                 // 頂点間距離（小さいほど滑らか）: 0.0012f〜0.004f
                 trail.minVertexDistance = 0.0018f;

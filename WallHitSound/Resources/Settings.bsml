@@ -13,7 +13,7 @@
       <slider-setting id="pitch-slider" text="Pitch" value="audio-pitch" 
         min="0.5" max="2.0" increment="0.05" apply-on-change="true" />
       <slider-setting id="particle-slider" text="Collision Particles" value="particle-count"
-        min="0" max="30" increment="1" formatter="FormatNoDecimal" apply-on-change="true" />
+        min="0" max="200" increment="1" formatter="FormatNoDecimal" apply-on-change="true" />
       <button text="Test Sound" on-click="test-sound" />
       <button text="Reset All Settings" on-click="reset-settings" />
     </vertical>
