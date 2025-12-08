@@ -45,8 +45,8 @@ namespace WallHitSound.Services
                         ? Camera.main.transform.forward
                         : this.transform.forward;
                     // 少し奥＋少し上にオフセットして、頭の高さ付近で視認しやすく表示
-                    float forwardOffset = 0.27f; // 0.18〜0.27で調整可
-                    float upOffset = 0.08f;      // 0.05〜0.12で調整可
+                    float forwardOffset = 0.40f; // 0.18〜0.40で調整可
+                    float upOffset = 0.06f;      // 0.05〜0.12で調整可
                     Vector3 spawnPos = origin + forward * forwardOffset + Vector3.up * upOffset;
                     ParticleEffectService.SpawnHemisphere(spawnPos, count, new Color(1.0f, 0.15f, 0.15f));
                 }

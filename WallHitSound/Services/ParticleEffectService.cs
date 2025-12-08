@@ -16,8 +16,8 @@ namespace WallHitSound.Services
             hemiNormal.Normalize();
 
             // 生成半径（接触点近傍）
-            // 調整目安: 0.003f（極小）〜 0.02f（やや広め）
-            float radius = 0.005f;
+            // 調整目安: 0.003f（極小）〜 0.10f（やや広め）
+            float radius = 0.10f;
             for (int i = 0; i < count; i++)
             {
                 // 半球内ランダム方向
@@ -33,9 +33,9 @@ namespace WallHitSound.Services
 
                 var trail = spark.AddComponent<TrailRenderer>();
                 // 表示時間（短いほど控えめ）: 0.03f〜0.08f 推奨
-                trail.time = 0.06f; // 少し長めにして視認性を向上
+                trail.time = 0.08f; // 少し長めにして視認性を向上
                 // 線幅（細いほど控えめ）: 0.0003f〜0.003f 推奨
-                trail.startWidth = 0.0025f; // 奥に表示する分、線幅を太くして視認性を確保
+                trail.startWidth = 0.003f; // 奥に表示する分、線幅を太くして視認性を確保
                 trail.endWidth = 0.0f;
                 // 頂点間距離（小さいほど滑らか）: 0.0012f〜0.004f
                 trail.minVertexDistance = 0.0018f;
