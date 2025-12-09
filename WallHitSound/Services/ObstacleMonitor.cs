@@ -28,6 +28,19 @@ namespace WallHitSound.Services
         {
             if (service == null || interaction == null) return;
             bool current = interaction.playerHeadIsInObstacle;
+
+            // プラグインの有効フラグを確認（デフォルトは有効扱い）
+            bool pluginActive = PluginConfig.Instance?.Enabled ?? true;
+
+            // ゲームプレイ中でプラグインが無効なら自動トリガーをスキップする。
+            // ただし previousFrameInObstacle は常に更新しておくことで、
+            // ゲームプレイから復帰した際に誤検出（立ち上がり）を防ぐ。
+            if (Plugin.IsInGameplay && !pluginActive)
+            {
+                previousFrameInObstacle = current;
+                return;
+            }
+
             if (!previousFrameInObstacle && current)
             {
                 service.PlaySound();
