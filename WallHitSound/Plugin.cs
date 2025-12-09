@@ -18,6 +18,9 @@ namespace WallHitSound
     {
         internal static Plugin Instance { get; private set; }
         public static IPA.Logging.Logger Log { get; private set; }
+        // ゲームプレイ中かどうかを示すフラグ。
+        // インストーラーやシーン遷移ハンドラで切り替える。
+        public static bool IsInGameplay { get; set; } = false;
 
         /// <summary>
         /// プラグイン初期化処理。コンフィグ生成と Zenject インストーラー登録。

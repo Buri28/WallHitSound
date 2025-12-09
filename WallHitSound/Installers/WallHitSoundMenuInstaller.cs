@@ -24,6 +24,9 @@ namespace WallHitSound.Installers
                 .AsSingle();
 
             Plugin.Log?.Info("WallHitSoundMenuInstaller: WallHitSoundViewController instantiated and bound");
+
+            // メニュースコープに入ったのでゲームプレイ状態フラグを落とす
+            Plugin.IsInGameplay = false;
         }
     }
 }

@@ -16,6 +16,12 @@ namespace WallHitSound.Installers
 
             // Manager をインスタンス化（ObstacleMonitor は内部で処理）
             Container.InstantiateComponentOnNewGameObject<Services.WallHitSoundManager>();
+
+            // プレイヤースコープに入ったのでゲームプレイ状態フラグを立てる
+            // メニューの設定画面でテストサウンドを鳴らすために
+            // メニュースコープにもWallHitSoundManagerがインストールされているため
+            // フラグで状態を区別する必要がある
+            Plugin.IsInGameplay = true;
         }
     }
 }
