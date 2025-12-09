@@ -1,6 +1,7 @@
 # WallHitSound
 
 壁に衝突したときに音を鳴らすMODです。  
+
 壁を避けたつもりでも、ぶつかっていることはありませんか？  
 私は大体ぶつかっています。  
 
@@ -21,12 +22,12 @@ Pluginsフォルダに「WallHitSound.dll」を格納してBeatSaberを起動し
 - **Sound Type**  
   壁に衝突したときに鳴らしたい音を選択します。  
   - beepを選択するとbeep音が鳴ります。  
-  - 鳴らしたい音を「[BeatSaber]\UserData\WallHitSound」フォルダに格納することでプルダウンから選択可能になります。    
+  - 鳴らしたい音を初回起動時に作成される「[BeatSaber]\UserData\WallHitSound」フォルダに格納することでプルダウンから選択可能になります。    
   - 対応音源は、wav、ogg、mp3になります。  
   - 初期音源としてdeep_impact.wav、wall_hit.wavが生成されます。(フォルダ作成時)  
 - **Beep Frequency(Hz)**  
   beep音の周波数を変更します。  
-　※Sound Typeでbeepを選択した場合のみ設定が有効になります。  
+  ※Sound Typeでbeepを選択した場合のみ設定が有効になります。  
   <img width="40%" height="40%" alt="image" src="https://github.com/user-attachments/assets/16949e34-562e-4d67-b94a-fd84ceae1573" />
 
 - **Pitch**  
