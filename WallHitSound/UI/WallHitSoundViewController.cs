@@ -201,7 +201,7 @@ namespace WallHitSound.UI
             try
             {
                 GameplaySetup.Instance.RemoveTab("WallHitSound");
-                GameplaySetup.Instance.AddTab("WallHitSound", "WallHitSound.UI.Settings.bsml", this, MenuType.Solo);
+                GameplaySetup.Instance.AddTab("WallHitSound", "WallHitSound.UI.Settings.bsml", this, MenuType.All);
                 _tabAdded = true;
                 if (!SuppressMenuLogs) Plugin.Log?.Info("WallHitSoundViewController: added GameplaySetup tab 'WallHitSound'");
             }
@@ -211,16 +211,17 @@ namespace WallHitSound.UI
             }
         }
 
-        /// <summary>
-        /// LateUpdate で GameplaySetup が利用可能になるのを待つ。
-        /// </summary>
-        private void LateUpdate()
-        {
-            if (!_tabAdded && GameplaySetup.Instance != null)
-            {
-                AddGameplayTabIfNeeded();
-            }
-        }
+        // ここは不要 v1.0.1
+        // /// <summary>
+        // /// LateUpdate で GameplaySetup が利用可能になるのを待つ。
+        // /// </summary>
+        // private void LateUpdate()
+        // {
+        //     if (!_tabAdded && GameplaySetup.Instance != null)
+        //     {
+        //         AddGameplayTabIfNeeded();
+        //     }
+        // }
 
         /// <summary>
         /// プラグイン有効/無効の設定。
