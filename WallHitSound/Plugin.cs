@@ -23,6 +23,19 @@ namespace WallHitSound
         public static bool IsInGameplay { get; set; } = false;
 
         /// <summary>
+        /// 詳細ログを出すかどうか。方針としてエラー以外は出さないので通常は false。
+        /// 調査したいときだけ true にしてビルドし直す。
+        /// </summary>
+        public static readonly bool VerboseLogs = false;
+
+        /// <summary>詳細ログ（VerboseLogs が true のときだけ出力）。</summary>
+        public static void LogDebug(string msg) { if (VerboseLogs) Log?.Debug(msg); }
+        /// <summary>詳細ログ（VerboseLogs が true のときだけ出力）。</summary>
+        public static void LogInfo(string msg) { if (VerboseLogs) Log?.Info(msg); }
+        /// <summary>警告ログ（VerboseLogs が true のときだけ出力）。動作は継続できている事象に使う。</summary>
+        public static void LogWarn(string msg) { if (VerboseLogs) Log?.Warn(msg); }
+
+        /// <summary>
         /// プラグイン初期化処理。コンフィグ生成と Zenject インストーラー登録。
         /// </summary>
         [Init]
@@ -33,17 +46,17 @@ namespace WallHitSound
 
             // コンフィグを生成
             PluginConfig.Instance = conf.Generated<PluginConfig>();
-            Log?.Info("WallHitSound: Config generated");
+            LogInfo("WallHitSound: Config generated");
 
             // プレイヤースコープインストーラーを登録
             zenjector.Install<Installers.WallHitSoundInstaller>(Location.Player);
-            Log?.Info("WallHitSound: Player installer registered");
+            LogInfo("WallHitSound: Player installer registered");
 
             // メニュースコープインストーラーを登録
             zenjector.Install<Installers.WallHitSoundMenuInstaller>(Location.Menu);
-            Log?.Info("WallHitSound: Menu installer registered");
+            LogInfo("WallHitSound: Menu installer registered");
 
-            Log?.Info("WallHitSound: Init complete");
+            LogInfo("WallHitSound: Init complete");
         }
     }
 }

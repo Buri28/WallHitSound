@@ -15,17 +15,20 @@ namespace WallHitSound.Services
         private ObstacleMonitor obstacleMonitor;
         private PlayerHeadAndObstacleInteraction obstacleInteraction;
 
+        // 曲開始時にシーン全体を走査する FindObjectOfType を避けるため、Zenject の注入で受け取る。
+        // Beat Saber のバージョンによってはバインドされていない可能性があるので Optional にし、
+        // 取れなかった場合だけ従来どおり検索へフォールバックする
+        [Inject(Optional = true)] private PlayerHeadAndObstacleInteraction injectedObstacleInteraction = null;
+
         [Inject]
         public void Construct(WallHitSoundService service)
         {
             SoundService = service;
         }
 
-        private static bool SuppressGameplayLogs = true;
-
         private void Awake()
         {
-            if (!SuppressGameplayLogs) Plugin.Log?.Info("WallHitSound: WallHitSoundManager Awake");
+            Plugin.LogInfo("WallHitSound: WallHitSoundManager Awake");
             // シングルトンパターンの実装
             if (Instance == null)
             {
@@ -36,16 +39,19 @@ namespace WallHitSound.Services
         private void Start()
         {
             // 音声サービスを初期化
-            // プレイ中の性能負荷軽減のため、Playerスコープではログを抑制
-            // プレイ中はサービスのログも抑制
-            SoundService.SetLogSuppressed(SuppressGameplayLogs);
             SoundService.Initialize();
 
-            // プレイヤーの障害物との衝突判定を取得
-            obstacleInteraction = UnityEngine.Object.FindObjectOfType<PlayerHeadAndObstacleInteraction>();
+            // プレイヤーの障害物との衝突判定を取得（注入で取れていればシーン走査はしない）
+            obstacleInteraction = injectedObstacleInteraction;
             if (obstacleInteraction == null)
             {
-                if (!SuppressGameplayLogs) Plugin.Log?.Error("WallHitSound: PlayerHeadAndObstacleInteraction not found");
+                // 注入が効かなくなったことに気づけるよう、この警告はログ抑制の対象外にする
+                Plugin.LogWarn("WallHitSound: PlayerHeadAndObstacleInteraction was not injected, falling back to FindObjectOfType");
+                obstacleInteraction = UnityEngine.Object.FindObjectOfType<PlayerHeadAndObstacleInteraction>();
+            }
+            if (obstacleInteraction == null)
+            {
+                Plugin.Log?.Error("WallHitSound: PlayerHeadAndObstacleInteraction not found");
                 return;
             }
 
@@ -53,17 +59,14 @@ namespace WallHitSound.Services
             obstacleMonitor = gameObject.AddComponent<ObstacleMonitor>();
             obstacleMonitor.Initialize(SoundService, obstacleInteraction);
 
-            if (!SuppressGameplayLogs) Plugin.Log?.Info("WallHitSound: Manager initialized successfully");
+            Plugin.LogInfo("WallHitSound: Manager initialized successfully");
         }
 
         private void OnDestroy()
         {
-            // リソースをクリーンアップ
-            if (SoundService != null)
-            {
-                SoundService.Dispose();
-                SoundService = null;
-            }
+            // AudioSource とクリップはアプリ全体で常駐し曲をまたいで使い回すので、
+            // ここでは参照を外すだけ（破棄すると次の曲で作り直すコストがかかる）
+            SoundService = null;
 
             if (Instance == this)
             {

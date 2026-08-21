@@ -12,7 +12,8 @@ namespace WallHitSound.Installers
         public override void InstallBindings()
         {
             // プレイヤースコープ用のサービスをバインド
-            Container.BindInterfacesAndSelfTo<Services.WallHitSoundService>().AsSingle();
+            // （AudioSource・クリップは static で常駐するので、スコープ破棄時の後始末は不要）
+            Container.Bind<Services.WallHitSoundService>().AsSingle();
 
             // Manager をインスタンス化（ObstacleMonitor は内部で処理）
             Container.InstantiateComponentOnNewGameObject<Services.WallHitSoundManager>();
