@@ -21,7 +21,7 @@ namespace WallHitSound.Utilities
                 string userDataPath = Path.Combine(UnityGame.UserDataPath, "WallHitSound");
 
                 // Menu/Gameplay 共にノイズになるため Debug に降格
-                Plugin.Log?.Debug($"WallHitSound: UserData path: {userDataPath}");
+                Plugin.LogDebug($"WallHitSound: UserData path: {userDataPath}");
 
                 return userDataPath;
             }

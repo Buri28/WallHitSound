@@ -19,15 +19,22 @@ namespace WallHitSound.Services
             {
                 if (string.IsNullOrEmpty(userDataPath) || !Directory.Exists(userDataPath))
                 {
-                    Plugin.Log?.Warn("WallHitSound: UserData path is invalid for default sound setup");
+                    Plugin.LogWarn("WallHitSound: UserData path is invalid for default sound setup");
                     return;
                 }
 
-                // デフォルトサウンドを複数生成
+                // デフォルトサウンドを複数生成。
+                // 既にあるファイルはスキップされるので、後から種類を増やしても
+                // ユーザーが差し替えた音を上書きすることはない
                 CopyDefaultSoundIfNeeded(userDataPath, "wall_hit", DefaultSoundGenerator.GenerateWallHitSound);
                 CopyDefaultSoundIfNeeded(userDataPath, "deep_impact", DefaultSoundGenerator.GenerateDeepImpactSound);
 
-                Plugin.Log?.Info("WallHitSound: Default sound files initialized");
+                // 低音系の「鈍い叩く音」。thud と thud_long は音色が同じで余韻の長さだけが違う
+                CopyDefaultSoundIfNeeded(userDataPath, "thud", DefaultSoundGenerator.GenerateThudSound);
+                CopyDefaultSoundIfNeeded(userDataPath, "thud_long", DefaultSoundGenerator.GenerateThudLongSound);
+                CopyDefaultSoundIfNeeded(userDataPath, "boom", DefaultSoundGenerator.GenerateBoomSound);
+
+                Plugin.LogInfo("WallHitSound: Default sound files initialized");
             }
             catch (Exception ex)
             {
@@ -46,7 +53,7 @@ namespace WallHitSound.Services
             // ファイルが既に存在する場合はスキップ
             if (File.Exists(targetPath))
             {
-                Plugin.Log?.Debug($"WallHitSound: Default sound already exists at {targetPath}");
+                Plugin.LogDebug($"WallHitSound: Default sound already exists at {targetPath}");
                 return;
             }
 
@@ -59,16 +66,20 @@ namespace WallHitSound.Services
                 {
                     byte[] wavData = AudioClipToWav(defaultClip);
                     File.WriteAllBytes(targetPath, wavData);
-                    Plugin.Log?.Info($"WallHitSound: Default sound generated and saved to {targetPath}");
+                    Plugin.LogInfo($"WallHitSound: Default sound generated and saved to {targetPath}");
+
+                    // 書き出しに使うだけのクリップなので破棄する。
+                    // AudioClip はアセット扱いで、参照を手放すだけでは解放されない
+                    UnityEngine.Object.Destroy(defaultClip);
                 }
                 else
                 {
-                    Plugin.Log?.Warn("WallHitSound: Failed to generate default sound");
+                    Plugin.LogWarn("WallHitSound: Failed to generate default sound");
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Log?.Warn($"WallHitSound: Failed to create default sound: {ex.Message}");
+                Plugin.LogWarn($"WallHitSound: Failed to create default sound: {ex.Message}");
             }
         }
 
@@ -113,7 +124,8 @@ namespace WallHitSound.Services
             int audioIndex = 0;
             for (int i = 0; i < samples.Length; i++)
             {
-                short sample = (short)(Mathf.Clamp01(samples[i]) * 32767f);
+                // Clamp01 では負の波形が 0 に潰れて半波整流になってしまうため、-1～1 でクランプする
+                short sample = (short)(Mathf.Clamp(samples[i], -1f, 1f) * 32767f);
                 System.BitConverter.GetBytes(sample).CopyTo(audioData, audioIndex);
                 audioIndex += 2;
             }
