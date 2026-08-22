@@ -9,6 +9,7 @@ using BeatSaberMarkupLanguage.GameplaySetup;
 using UnityEngine;
 using WallHitSound.Services;
 using WallHitSound.Utilities;
+using WallHitSound.Services.Effects;
 using ModestTree;
 
 namespace WallHitSound.UI
@@ -49,6 +50,9 @@ namespace WallHitSound.UI
         [UIComponent("beep-slider")] private SliderSetting _beepSlider;
         [UIComponent("pitch-slider")] private SliderSetting _pitchSlider;
         [UIComponent("particle-slider")] private SliderSetting _particleSlider;
+        [UIComponent("effect-dropdown")] private DropDownListSetting _effectDropdown;
+        [UIComponent("effect-scale-slider")] private SliderSetting _effectScaleSlider;
+        [UIComponent("effect-opacity-slider")] private SliderSetting _effectOpacitySlider;
 #pragma warning restore 0649
 
         // ローカルバインディング用の変数（UI表示用）
@@ -58,6 +62,9 @@ namespace WallHitSound.UI
         private float _beepFrequency = 1000f;
         private float _audioPitch = 1.0f;
         private float _particleCount = 0f;
+        private string _effectType = HitEffectService.TypeSpark;
+        private float _effectScale = 1.0f;
+        private float _effectOpacity = 1.0f;
 
         // 設定の反映・テスト再生に使うサービス。
         // AudioSource・クリップはサービス側で static に常駐するので、
@@ -80,6 +87,13 @@ namespace WallHitSound.UI
             _beepFrequency = PluginConfig.Instance.BeepFrequency;
             _audioPitch = PluginConfig.Instance.AudioPitch;
             _particleCount = PluginConfig.Instance.ParticleCount;
+            _effectType = PluginConfig.Instance.EffectType ?? HitEffectService.TypeSpark;
+            // 設定ファイルを手で編集して範囲外の値が入っていると、UI（スライダー側で丸められる）と
+            // 保存値が食い違うので、読み込んだ時点で範囲に収めておく
+            _effectScale = Mathf.Clamp(PluginConfig.Instance.EffectScale, 0.3f, 2.0f);
+            _effectOpacity = Mathf.Clamp(PluginConfig.Instance.EffectOpacity, 0.2f, 1.0f);
+            PluginConfig.Instance.EffectScale = _effectScale;
+            PluginConfig.Instance.EffectOpacity = _effectOpacity;
             Plugin.LogInfo($"WallHitSound: Initialized local fields - Enabled={_enabled}, Volume={_volume}, Sound={_selectedSound}, Freq={_beepFrequency}, Pitch={_audioPitch}");
 
             // カスタムサウンドファイルを読み込む（初回はここでデフォルト音が生成される）
@@ -89,6 +103,9 @@ namespace WallHitSound.UI
             // デフォルト音の生成より後に呼ぶこと。先に呼ぶと、まだファイルが無い状態で
             // 「読み込み失敗→ビープ」がキャッシュされてしまう
             SoundService.Prewarm();
+
+            // エフェクトの形と GameObject も同じ理由でここで用意しておく
+            HitEffectService.Prewarm();
         }
 
         private void Start()
@@ -97,18 +114,38 @@ namespace WallHitSound.UI
             AddGameplayTabIfNeeded();
         }
 
+        /// <summary>
+        /// UI コンポーネントへの反映を 1 つずつ包む。設定ファイルを手で編集した、
+        /// あるいは選んでいたカスタム音のファイルを消した場合、ドロップダウンの選択肢に
+        /// 無い値が入って ReceiveValue が落ちうるため、1 つ失敗しても残りは反映させる。
+        /// </summary>
+        private void SyncComponent(string name, Action apply)
+        {
+            try
+            {
+                apply();
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogWarn($"WallHitSound: Failed to sync '{name}': {ex.Message}");
+            }
+        }
+
         // BSMLのパース完了後に確実に初期値をUIへ反映
         [UIAction("#post-parse")]
         private void OnPostParse()
         {
             Plugin.LogInfo("WallHitSoundViewController OnPostParse - syncing UI components");
             // UI コンポーネントの初期同期
-            if (_enabledToggle != null) { _enabledToggle.Value = _enabled; _enabledToggle.ReceiveValue(); }
-            if (_volumeSlider != null) { _volumeSlider.Value = _volume; _volumeSlider.ReceiveValue(); }
-            if (_soundDropdown != null) { _soundDropdown.Value = _selectedSound; _soundDropdown.ReceiveValue(); }
-            if (_beepSlider != null) { _beepSlider.Value = _beepFrequency; _beepSlider.ReceiveValue(); }
-            if (_pitchSlider != null) { _pitchSlider.Value = _audioPitch; _pitchSlider.ReceiveValue(); }
-            if (_particleSlider != null) { _particleSlider.Value = _particleCount; _particleSlider.ReceiveValue(); }
+            SyncComponent("enabled-toggle", () => { if (_enabledToggle != null) { _enabledToggle.Value = _enabled; _enabledToggle.ReceiveValue(); } });
+            SyncComponent("volume-slider", () => { if (_volumeSlider != null) { _volumeSlider.Value = _volume; _volumeSlider.ReceiveValue(); } });
+            SyncComponent("sound-dropdown", () => { if (_soundDropdown != null) { _soundDropdown.Value = _selectedSound; _soundDropdown.ReceiveValue(); } });
+            SyncComponent("beep-slider", () => { if (_beepSlider != null) { _beepSlider.Value = _beepFrequency; _beepSlider.ReceiveValue(); } });
+            SyncComponent("pitch-slider", () => { if (_pitchSlider != null) { _pitchSlider.Value = _audioPitch; _pitchSlider.ReceiveValue(); } });
+            SyncComponent("particle-slider", () => { if (_particleSlider != null) { _particleSlider.Value = _particleCount; _particleSlider.ReceiveValue(); } });
+            SyncComponent("effect-dropdown", () => { if (_effectDropdown != null) { _effectDropdown.Value = _effectType; _effectDropdown.ReceiveValue(); } });
+            SyncComponent("effect-scale-slider", () => { if (_effectScaleSlider != null) { _effectScaleSlider.Value = _effectScale; _effectScaleSlider.ReceiveValue(); } });
+            SyncComponent("effect-opacity-slider", () => { if (_effectOpacitySlider != null) { _effectOpacitySlider.Value = _effectOpacity; _effectOpacitySlider.ReceiveValue(); } });
         }
 
         private void OnEnable()
@@ -380,7 +417,121 @@ namespace WallHitSound.UI
                     _particleCount = Mathf.Clamp(value, 0f, 200f);
                     PluginConfig.Instance.ParticleCount = Mathf.RoundToInt(_particleCount);
                     Plugin.LogInfo($"WallHitSound: ParticleCount changed to {PluginConfig.Instance.ParticleCount}");
+
+                    // 火花を設定数ぶん用意しておく（曲中に作り足さないため）
+                    try
+                    {
+                        ParticleEffectService.Prewarm(PluginConfig.Instance.ParticleCount);
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.LogWarn($"WallHitSound: Failed to prewarm sparks: {ex.Message}");
+                    }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 衝突エフェクトの種類の選択肢。
+        /// </summary>
+        [UIValue("effect-options")]
+        public List<object> EffectOptions => new List<object>
+        {
+            HitEffectService.TypeNone,
+            HitEffectService.TypeSpark,
+            HitEffectService.TypeBurst,
+            HitEffectService.TypeCrack,
+        };
+
+        /// <summary>
+        /// 選択された衝突エフェクト。切り替え時に形とプールを用意し直す。
+        /// </summary>
+        [UIValue("selected-effect")]
+        public string SelectedEffect
+        {
+            get => _effectType;
+            set
+            {
+                if (_effectType != value)
+                {
+                    _effectType = value;
+                    PluginConfig.Instance.EffectType = value;
+                    Plugin.LogInfo($"WallHitSound: EffectType changed to {value}");
+                    NotifyUI("selected-effect");
+
+                    // 曲開始時にも衝突時にも生成が走らないよう、ここで作り置きしておく
+                    try
+                    {
+                        HitEffectService.Prewarm();
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.LogWarn($"WallHitSound: Failed to prewarm effects: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// エフェクトの大きさ倍率（0.3～2.0）。
+        /// </summary>
+        [UIValue("effect-scale")]
+        public float EffectScale
+        {
+            get => _effectScale;
+            set
+            {
+                float clamped = Mathf.Clamp(value, 0.3f, 2.0f);
+                if (Math.Abs(_effectScale - clamped) > 0.001f)
+                {
+                    _effectScale = clamped;
+                    PluginConfig.Instance.EffectScale = _effectScale;
+                    Plugin.LogInfo($"WallHitSound: EffectScale changed to {_effectScale}");
+                    NotifyUI("effect-scale");
+                }
+            }
+        }
+
+        /// <summary>
+        /// エフェクトの濃さ（0.2～1.0）。譜面が見づらいときはここを下げる。
+        /// </summary>
+        [UIValue("effect-opacity")]
+        public float EffectOpacity
+        {
+            get => _effectOpacity;
+            set
+            {
+                float clamped = Mathf.Clamp(value, 0.2f, 1.0f);
+                if (Math.Abs(_effectOpacity - clamped) > 0.001f)
+                {
+                    _effectOpacity = clamped;
+                    PluginConfig.Instance.EffectOpacity = _effectOpacity;
+                    Plugin.LogInfo($"WallHitSound: EffectOpacity changed to {_effectOpacity}");
+                    NotifyUI("effect-opacity");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 現在の設定でエフェクトだけを出すテストメソッド。
+        /// 実際の衝突と同じ経路を通すので、見え方はプレイ中とまったく同じになる。
+        /// </summary>
+        [UIAction("test-effect")]
+        public void TestEffect()
+        {
+            try
+            {
+                Vector3 position;
+                if (!EffectCamera.TryGetSpawnPoint(out position))
+                {
+                    Plugin.LogWarn("WallHitSound: No camera found for the effect test");
+                    return;
+                }
+                HitEffectService.PlayAt(_effectType, position);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log?.Error($"WallHitSound: TestEffect failed: {ex.Message}");
             }
         }
 
@@ -419,14 +570,33 @@ namespace WallHitSound.UI
             BeepFrequency = 1000f;
             AudioPitch = 1.0f;
             ParticleCount = 0f;
+            SelectedEffect = HitEffectService.TypeSpark;
+            EffectScale = 1.0f;
+            EffectOpacity = 1.0f;
+
+            // 色は設定画面に項目が無いぶん、ここで戻せないと JSON を直すしかなくなる
+            PluginConfig.Instance.BurstFillColor = PluginConfig.DefaultBurstFillColor;
+            PluginConfig.Instance.BurstEdgeColor = PluginConfig.DefaultBurstEdgeColor;
+            PluginConfig.Instance.CrackColor = PluginConfig.DefaultCrackColor;
+            try
+            {
+                HitEffectService.Prewarm();
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogWarn($"WallHitSound: Failed to prewarm effects: {ex.Message}");
+            }
 
             // UIコンポーネントへ直接反映
-            if (_enabledToggle != null) { _enabledToggle.Value = _enabled; _enabledToggle.ReceiveValue(); }
-            if (_volumeSlider != null) { _volumeSlider.Value = _volume; _volumeSlider.ReceiveValue(); }
-            if (_soundDropdown != null) { _soundDropdown.Value = _selectedSound; _soundDropdown.ReceiveValue(); }
-            if (_beepSlider != null) { _beepSlider.Value = _beepFrequency; _beepSlider.ReceiveValue(); }
-            if (_pitchSlider != null) { _pitchSlider.Value = _audioPitch; _pitchSlider.ReceiveValue(); }
-            if (_particleSlider != null) { _particleSlider.Value = _particleCount; _particleSlider.ReceiveValue(); }
+            SyncComponent("enabled-toggle", () => { if (_enabledToggle != null) { _enabledToggle.Value = _enabled; _enabledToggle.ReceiveValue(); } });
+            SyncComponent("volume-slider", () => { if (_volumeSlider != null) { _volumeSlider.Value = _volume; _volumeSlider.ReceiveValue(); } });
+            SyncComponent("sound-dropdown", () => { if (_soundDropdown != null) { _soundDropdown.Value = _selectedSound; _soundDropdown.ReceiveValue(); } });
+            SyncComponent("beep-slider", () => { if (_beepSlider != null) { _beepSlider.Value = _beepFrequency; _beepSlider.ReceiveValue(); } });
+            SyncComponent("pitch-slider", () => { if (_pitchSlider != null) { _pitchSlider.Value = _audioPitch; _pitchSlider.ReceiveValue(); } });
+            SyncComponent("particle-slider", () => { if (_particleSlider != null) { _particleSlider.Value = _particleCount; _particleSlider.ReceiveValue(); } });
+            SyncComponent("effect-dropdown", () => { if (_effectDropdown != null) { _effectDropdown.Value = _effectType; _effectDropdown.ReceiveValue(); } });
+            SyncComponent("effect-scale-slider", () => { if (_effectScaleSlider != null) { _effectScaleSlider.Value = _effectScale; _effectScaleSlider.ReceiveValue(); } });
+            SyncComponent("effect-opacity-slider", () => { if (_effectOpacitySlider != null) { _effectOpacitySlider.Value = _effectOpacity; _effectOpacitySlider.ReceiveValue(); } });
 
             // タブ再構築は行わない（レイアウト崩れ回避）。通知のみで反映。
             Plugin.LogInfo("WallHitSound: ===== RESET SETTINGS END =====");

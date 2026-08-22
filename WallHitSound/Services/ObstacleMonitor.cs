@@ -1,4 +1,5 @@
 using UnityEngine;
+using WallHitSound.Services.Effects;
 
 namespace WallHitSound.Services
 {
@@ -45,24 +46,9 @@ namespace WallHitSound.Services
             {
                 service.PlaySound();
 
-                // パーティクル表示（設定が0なら無効）
-                int count = PluginConfig.Instance?.ParticleCount ?? 0;
-                if (count > 0)
-                {
-                    // 物理APIが参照されていない環境もあるため、低負荷な前方オフセットにフォールバック
-                    // セイバーではなく頭（HMD）位置基準にする
-                    Vector3 origin = (Camera.main != null)
-                        ? Camera.main.transform.position
-                        : this.transform.position;
-                    Vector3 forward = (Camera.main != null)
-                        ? Camera.main.transform.forward
-                        : this.transform.forward;
-                    // 少し奥＋少し上にオフセットして、頭の高さ付近で視認しやすく表示
-                    float forwardOffset = 0.50f; // 0.18〜0.50で調整可
-                    float upOffset = 0.06f;      // 0.05〜0.12で調整可
-                    Vector3 spawnPos = origin + forward * forwardOffset + Vector3.up * upOffset;
-                    ParticleEffectService.SpawnHemisphere(spawnPos, count, new Color(1.0f, 0.15f, 0.15f));
-                }
+                // 見た目のエフェクト。位置決めと種類の振り分けはサービス側で行う
+                // （形も GameObject も作り置き済みなので、ここでは表示するだけ）
+                HitEffectService.Play();
             }
             previousFrameInObstacle = current;
         }
