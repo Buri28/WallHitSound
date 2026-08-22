@@ -61,10 +61,10 @@ namespace WallHitSound.UI
         private string _selectedSound = "beep";
         private float _beepFrequency = 1000f;
         private float _audioPitch = 1.0f;
-        private float _particleCount = 0f;
-        private string _effectType = HitEffectService.TypeSpark;
-        private float _effectScale = 1.0f;
-        private float _effectOpacity = 1.0f;
+        private float _particleCount = PluginConfig.DefaultParticleCount;
+        private string _effectType = PluginConfig.DefaultEffectType;
+        private float _effectScale = PluginConfig.DefaultEffectScale;
+        private float _effectOpacity = PluginConfig.DefaultEffectOpacity;
 
         // 設定の反映・テスト再生に使うサービス。
         // AudioSource・クリップはサービス側で static に常駐するので、
@@ -87,7 +87,7 @@ namespace WallHitSound.UI
             _beepFrequency = PluginConfig.Instance.BeepFrequency;
             _audioPitch = PluginConfig.Instance.AudioPitch;
             _particleCount = PluginConfig.Instance.ParticleCount;
-            _effectType = PluginConfig.Instance.EffectType ?? HitEffectService.TypeSpark;
+            _effectType = PluginConfig.Instance.EffectType ?? PluginConfig.DefaultEffectType;
             // 設定ファイルを手で編集して範囲外の値が入っていると、UI（スライダー側で丸められる）と
             // 保存値が食い違うので、読み込んだ時点で範囲に収めておく
             _effectScale = Mathf.Clamp(PluginConfig.Instance.EffectScale, 0.3f, 2.0f);
@@ -98,6 +98,9 @@ namespace WallHitSound.UI
 
             // カスタムサウンドファイルを読み込む（初回はここでデフォルト音が生成される）
             LoadCustomSoundFiles();
+
+            // 初回起動時のサウンドを決める。ファイルが揃ったあとでないと判定できない
+            ResolveInitialSound();
 
             // クリップを事前に用意しておく（曲開始時に読み込みが走らないように）。
             // デフォルト音の生成より後に呼ぶこと。先に呼ぶと、まだファイルが無い状態で
@@ -212,6 +215,30 @@ namespace WallHitSound.UI
                 _customSoundFiles.Clear();
                 _customSoundFiles.Add("beep");
             }
+        }
+
+        /// <summary>
+        /// 初回起動（サウンド未設定）のときに既定のサウンドを決める。
+        /// thud があれば thud、無ければ beep。すでに選んでいる人の設定は書き換えない。
+        /// </summary>
+        private void ResolveInitialSound()
+        {
+            if (!string.IsNullOrEmpty(PluginConfig.Instance.SelectedClipName)) return;
+
+            string initial = DefaultSoundName();
+            _selectedSound = initial;
+            PluginConfig.Instance.SelectedClipName = initial;
+            Plugin.LogInfo($"WallHitSound: Initial sound set to {initial}");
+        }
+
+        /// <summary>
+        /// 既定にしたいサウンド名。thud が用意できていればそれ、無ければ beep。
+        /// </summary>
+        private string DefaultSoundName()
+        {
+            return _customSoundFiles.Contains(PluginConfig.PreferredSoundName)
+                ? PluginConfig.PreferredSoundName
+                : PluginConfig.FallbackSoundName;
         }
 
         private bool _tabAdded = false;
@@ -418,10 +445,15 @@ namespace WallHitSound.UI
                     PluginConfig.Instance.ParticleCount = Mathf.RoundToInt(_particleCount);
                     Plugin.LogInfo($"WallHitSound: ParticleCount changed to {PluginConfig.Instance.ParticleCount}");
 
-                    // 火花を設定数ぶん用意しておく（曲中に作り足さないため）
+                    // 火花を設定数ぶん用意しておく（曲中に作り足さないため）。
+                    // spark 以外を選んでいるときは使わないので作らない
+                    // （spark に切り替えた時点で SelectedEffect 側の Prewarm が用意する）
                     try
                     {
-                        ParticleEffectService.Prewarm(PluginConfig.Instance.ParticleCount);
+                        if (_effectType == HitEffectService.TypeSpark)
+                        {
+                            ParticleEffectService.Prewarm(PluginConfig.Instance.ParticleCount);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -566,13 +598,13 @@ namespace WallHitSound.UI
             // デフォルト値を設定
             Enabled = true;
             Volume = 1.0f;
-            SelectedSound = "beep";
+            SelectedSound = DefaultSoundName();
             BeepFrequency = 1000f;
             AudioPitch = 1.0f;
-            ParticleCount = 0f;
-            SelectedEffect = HitEffectService.TypeSpark;
-            EffectScale = 1.0f;
-            EffectOpacity = 1.0f;
+            ParticleCount = PluginConfig.DefaultParticleCount;
+            SelectedEffect = PluginConfig.DefaultEffectType;
+            EffectScale = PluginConfig.DefaultEffectScale;
+            EffectOpacity = PluginConfig.DefaultEffectOpacity;
 
             // 色は設定画面に項目が無いぶん、ここで戻せないと JSON を直すしかなくなる
             PluginConfig.Instance.BurstFillColor = PluginConfig.DefaultBurstFillColor;
