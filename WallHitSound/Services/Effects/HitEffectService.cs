@@ -133,7 +133,7 @@ namespace WallHitSound.Services.Effects
         private static string CurrentType()
         {
             string type = ReadString(() => PluginConfig.Instance.EffectType);
-            return string.IsNullOrEmpty(type) ? TypeSpark : type;
+            return string.IsNullOrEmpty(type) ? PluginConfig.DefaultEffectType : type;
         }
 
         /// <summary>形・プール・Mesh をひととおり整える。すべて済んでいれば何もしない。</summary>
