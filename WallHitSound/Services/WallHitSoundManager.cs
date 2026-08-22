@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Zenject;
 
@@ -15,15 +16,18 @@ namespace WallHitSound.Services
         private ObstacleMonitor obstacleMonitor;
         private PlayerHeadAndObstacleInteraction obstacleInteraction;
 
-        // 曲開始時にシーン全体を走査する FindObjectOfType を避けるため、Zenject の注入で受け取る。
-        // Beat Saber のバージョンによってはバインドされていない可能性があるので Optional にし、
-        // 取れなかった場合だけ従来どおり検索へフォールバックする
-        [Inject(Optional = true)] private PlayerHeadAndObstacleInteraction injectedObstacleInteraction = null;
+        // 曲開始時にシーン全体を走査する FindObjectOfType を避けるため、Zenject から受け取る。
+        // ただし install の最中に解決しようとしてはいけない。その時点ではゲーム側の binding が
+        // 揃っておらず、PlayerHeadAndObstacleInteraction の組み立てに失敗すると
+        // シーンの install ごと巻き添えで落ちる。コンテナだけ先に受け取り、
+        // すべて揃った Start で解決する
+        private DiContainer container;
 
         [Inject]
-        public void Construct(WallHitSoundService service)
+        public void Construct(WallHitSoundService service, DiContainer diContainer)
         {
             SoundService = service;
+            container = diContainer;
         }
 
         private void Awake()
@@ -41,14 +45,8 @@ namespace WallHitSound.Services
             // 音声サービスを初期化
             SoundService.Initialize();
 
-            // プレイヤーの障害物との衝突判定を取得（注入で取れていればシーン走査はしない）
-            obstacleInteraction = injectedObstacleInteraction;
-            if (obstacleInteraction == null)
-            {
-                // 注入が効かなくなったことに気づけるよう、この警告はログ抑制の対象外にする
-                Plugin.LogWarn("WallHitSound: PlayerHeadAndObstacleInteraction was not injected, falling back to FindObjectOfType");
-                obstacleInteraction = UnityEngine.Object.FindObjectOfType<PlayerHeadAndObstacleInteraction>();
-            }
+            // プレイヤーの障害物との衝突判定を取得
+            obstacleInteraction = ResolveObstacleInteraction();
             if (obstacleInteraction == null)
             {
                 Plugin.Log?.Error("WallHitSound: PlayerHeadAndObstacleInteraction not found");
@@ -62,11 +60,33 @@ namespace WallHitSound.Services
             Plugin.LogInfo("WallHitSound: Manager initialized successfully");
         }
 
+        /// <summary>
+        /// 障害物との衝突判定を取り出す。コンテナから取れなければシーン走査に落とす。
+        /// 解決に失敗しても曲を巻き添えにしないよう、例外はここで止める。
+        /// </summary>
+        private PlayerHeadAndObstacleInteraction ResolveObstacleInteraction()
+        {
+            try
+            {
+                var resolved = container?.TryResolve<PlayerHeadAndObstacleInteraction>();
+                if (resolved != null) return resolved;
+            }
+            catch (Exception ex)
+            {
+                // 注入が効かなくなったことに気づけるよう、この警告はログ抑制の対象外にする
+                Plugin.Log?.Warn($"WallHitSound: Failed to resolve PlayerHeadAndObstacleInteraction: {ex.Message}");
+            }
+
+            Plugin.Log?.Warn("WallHitSound: PlayerHeadAndObstacleInteraction was not resolved, falling back to FindObjectOfType");
+            return UnityEngine.Object.FindObjectOfType<PlayerHeadAndObstacleInteraction>();
+        }
+
         private void OnDestroy()
         {
             // AudioSource とクリップはアプリ全体で常駐し曲をまたいで使い回すので、
             // ここでは参照を外すだけ（破棄すると次の曲で作り直すコストがかかる）
             SoundService = null;
+            container = null;
 
             if (Instance == this)
             {

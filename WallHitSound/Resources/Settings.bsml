@@ -1,21 +1,70 @@
 <bg>
-  <vertical>
-    <text text="WallHitSound Settings" alignment="Center" font-size="6" />
-    <vertical child-control-size="false" spacing="1" pad="2">
-      <toggle-setting id="enabled-toggle" text="Enabled" value="enabled" apply-on-change="true" />
-      <slider-setting id="volume-slider" text="Volume" value="volume" 
-        min="0" max="1" increment="0.01" apply-on-change="true" />
-      <dropdown-list-setting id="sound-dropdown" text="Sound Type" 
-        value="selected-sound" choices="sound-options" apply-on-change="true" />
-      <slider-setting id="beep-slider" text="Beep Frequency (Hz)" 
-        value="beep-frequency" min="100" max="2000" increment="10" 
-        formatter="FormatNoDecimal" apply-on-change="true" />
-      <slider-setting id="pitch-slider" text="Pitch" value="audio-pitch" 
-        min="0.5" max="2.0" increment="0.05" apply-on-change="true" />
-      <slider-setting id="particle-slider" text="Collision Particles" value="particle-count"
-        min="0" max="200" increment="1" formatter="FormatNoDecimal" apply-on-change="true" />
-      <button text="Test Sound" on-click="test-sound" />
-      <button text="Reset All Settings" on-click="reset-settings" />
+  <!-- 構造は隣の LRCounter (LRSettingsView.bsml) に合わせている。
+       タブを bg 直下に置くと選択が効かず、ラッパーに高さ・幅を明示しないと中身が潰れるため。 -->
+  <vertical spacing='1' pad='1' align='TopCenter' pref-width='110'>
+
+    <!-- ───── 常時表示ヘッダー（タブの外）: Enabled / Reset ───── -->
+    <horizontal spacing='4' pref-height='8' horizontal-fit='PreferredSize'>
+      <toggle-setting id='enabled-toggle'
+                      text='Enabled'
+                      value='enabled'
+                      apply-on-change='true'
+                      pref-width='45'
+                      hover-hint='Enable or disable the mod.' />
+      <button text='Reset All Settings'
+              on-click='reset-settings'
+              pref-width='34'
+              hover-hint='Reset all settings to their defaults.' />
+    </horizontal>
+
+    <!-- ───── タブ切り替え（Sound / Effect） ───── -->
+    <vertical pref-height='8' pref-width='60'>
+      <tab-select tab-tag='whs-tabs' size-delta-y='8' child-expand-width='true' />
+    </vertical>
+
+    <!-- ───── タブ本体（高さ・幅を明示したラッパーの中に置く） ───── -->
+    <vertical pref-height='58' pref-width='110'>
+
+      <!-- ───────────────────── Sound タブ ───────────────────── -->
+      <tab tags='whs-tabs' tab-name='Sound'>
+        <settings-container child-control-width='true' child-expand-width='true' spacing='0' pad='0'>
+          <slider-setting id='volume-slider' text='Volume' value='volume'
+                          min='0' max='1' increment='0.01' apply-on-change='true'
+                          hover-hint='Playback volume of the wall hit sound.' />
+          <dropdown-list-setting id='sound-dropdown' text='Sound Type'
+                                 value='selected-sound' choices='sound-options' apply-on-change='true'
+                                 hover-hint='beep, or a wav/ogg/mp3 placed in UserData/WallHitSound.' />
+          <slider-setting id='beep-slider' text='Beep Frequency (Hz)' value='beep-frequency'
+                          min='100' max='2000' increment='10' formatter='FormatNoDecimal' apply-on-change='true'
+                          hover-hint='Pitch of the generated beep.' />
+          <slider-setting id='pitch-slider' text='Pitch' value='audio-pitch'
+                          min='0.5' max='2.0' increment='0.05' apply-on-change='true'
+                          hover-hint='Playback speed applied to every sound.' />
+          <button text='Test Sound' on-click='test-sound'
+                  hover-hint='Play the current sound once.' />
+        </settings-container>
+      </tab>
+
+      <!-- ───────────────────── Effect タブ ───────────────────── -->
+      <tab tags='whs-tabs' tab-name='Effect'>
+        <settings-container child-control-width='true' child-expand-width='true' spacing='0' pad='0'>
+          <dropdown-list-setting id='effect-dropdown' text='Hit Effect'
+                                 value='selected-effect' choices='effect-options' apply-on-change='true'
+                                 hover-hint='none, spark, burst (comic) or crack.' />
+          <slider-setting id='particle-slider' text='Spark Count' value='particle-count'
+                          min='0' max='200' increment='1' formatter='FormatNoDecimal' apply-on-change='true'
+                          hover-hint='Number of sparks. Only used by the spark effect.' />
+          <slider-setting id='effect-scale-slider' text='Effect Size' value='effect-scale'
+                          min='0.3' max='2.0' increment='0.05' apply-on-change='true'
+                          hover-hint='Size of the burst and crack effects.' />
+          <slider-setting id='effect-opacity-slider' text='Effect Opacity' value='effect-opacity'
+                          min='0.2' max='1.0' increment='0.05' apply-on-change='true'
+                          hover-hint='Lower this if the effect hides the notes.' />
+          <button text='Test Effect' on-click='test-effect'
+                  hover-hint='Show the current effect once.' />
+        </settings-container>
+      </tab>
+
     </vertical>
   </vertical>
 </bg>
